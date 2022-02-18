@@ -1,4 +1,3 @@
-import json
 import os
 
 import streamlit as st
@@ -20,8 +19,18 @@ def caption():
 
 
 def player_form():
-    player_id = st.sidebar.text_input("Player ID")
-    player_platform = st.sidebar.selectbox("Platform", ["steam", "ps4", "xbox", "epic"])
+    player_id = st.sidebar.text_input(
+        label="Player ID",
+        help="Unique player identifier. For console players, this is simply your "
+        "gamertag. For Steam/Epic players this will be your Steam/Epic ID, not your "
+        "display name.",
+    )
+    player_platform = st.sidebar.selectbox(
+        label="Platform", options=["steam", "ps4", "xbox", "epic"]
+    )
+    playlists = st.sidebar.multiselect(
+        label="Playlists", options=["ranked-duels", "ranked-doubles", "ranked-standard"]
+    )
 
     submit = st.sidebar.button(label="Retrieve Statistics", disabled=(not player_id))
     if submit:
@@ -35,6 +44,7 @@ def player_form():
                     "count": 200,
                     "sort-by": "replay-date",
                     "sort-dir": "desc",
+                    "playlist": playlists,
                 },
             )
             st.sidebar.success(f"Retrieved {len(replay_ids)} replays for {player_id}")
