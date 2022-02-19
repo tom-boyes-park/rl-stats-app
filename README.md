@@ -1,4 +1,4 @@
-# Rocket League Statistics Web App 🚀
+# 🚀 Rocket League Gameplay Stats
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/tom-boyes-park/rl-stats-app/main/app.py)
 
