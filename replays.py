@@ -1,11 +1,11 @@
 import json
 import time
-from typing import List, NamedTuple, Dict
+from typing import Dict, List, NamedTuple
+
+import pandas as pd
+import streamlit as st
 
 from ball_chasing import BallChaser
-import pandas as pd
-
-import streamlit as st
 
 
 @st.experimental_memo

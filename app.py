@@ -3,9 +3,10 @@ from typing import List
 
 import pandas as pd
 import streamlit as st
+
 from ball_chasing import BallChaser
 from replays import get_replay_ids, get_replay_stats
-from stats import stats_comparison_radar, STATISTIC_GROUPS
+from stats import STATISTIC_GROUPS, stats_comparison_radar
 
 PLATFORMS = {"Steam": "steam", "PSN": "ps4", "Xbox": "xbox", "Epic Games": "epic"}
 PLAYLISTS = ["ranked-duels", "ranked-doubles", "ranked-standard"]
