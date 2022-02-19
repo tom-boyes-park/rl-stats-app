@@ -55,6 +55,7 @@ class ReplayStatistics(NamedTuple):
         required_cols = [
             "REPLAY_ID",
             "PLAYER_ID",
+            "WINNING_TEAM",
             *[col for col in df.columns if col.startswith("STATS_")],
         ]
         df = df[required_cols]
@@ -84,10 +85,25 @@ def get_replay_stats(_ball_chaser: BallChaser, replay_id: str) -> ReplayStatisti
 
     response_json = response.json()
 
+    blue_players = response_json["blue"]["players"]
+    orange_players = response_json["orange"]["players"]
+
+    # determine winning team (breaks down for games where there was a draw + forfeit,
+    # however we have no other field to determine winning team and this scenario will
+    # be rare)
+    blue_core_stats = response_json["blue"]["stats"]["core"]
+    blue_win = blue_core_stats["goals"] > blue_core_stats["goals_against"]
+
+    for player in blue_players:
+        player["WINNING_TEAM"] = blue_win
+
+    for player in orange_players:
+        player["WINNING_TEAM"] = not blue_win
+
     return ReplayStatistics(
         replay_id,
         [
-            *response_json["blue"]["players"],
-            *response_json["orange"]["players"],
+            *blue_players,
+            *orange_players,
         ],
     )
