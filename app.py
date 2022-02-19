@@ -3,7 +3,7 @@ from typing import List
 
 import streamlit as st
 from ball_chasing import BallChaser
-from replays import get_replay_ids
+from replays import get_replay_ids, get_replay_stats
 
 PLATFORMS = {"Steam": "steam", "PSN": "ps4", "Xbox": "xbox", "Epic Games": "epic"}
 PLAYLISTS = ["ranked-duels", "ranked-doubles", "ranked-standard"]
@@ -73,6 +73,13 @@ def app():
     title()
     player_form()
     st.json(st.session_state)
+
+    replay_stats = []
+    for replay_id in st.session_state.replay_ids:
+        replay_stats.append(get_replay_stats(st.session_state.ball_chaser, replay_id))
+
+    st.json(replay_stats)
+
     caption()
 
 
