@@ -1,9 +1,11 @@
 import os
 from typing import List
 
+import pandas as pd
 import streamlit as st
 from ball_chasing import BallChaser
 from replays import get_replay_ids, get_replay_stats
+from stats import plot_statistics
 
 PLATFORMS = {"Steam": "steam", "PSN": "ps4", "Xbox": "xbox", "Epic Games": "epic"}
 PLAYLISTS = ["ranked-duels", "ranked-doubles", "ranked-standard"]
@@ -69,18 +71,20 @@ def player_form():
     )
 
 
+def stats_display():
+    replay_stats = []
+    for replay_id in st.session_state.replay_ids:
+        replay_stats.append(get_replay_stats(st.session_state.ball_chaser, replay_id).dataframe())
+    all_stats_df = pd.concat(replay_stats, ignore_index=True)
+
+    st.plotly_chart(plot_statistics(df=all_stats_df, stats_group="core"))
+
+
 def app():
     title()
     player_form()
     st.json(st.session_state)
-
-    replay_stats = []
-    for replay_id in st.session_state.replay_ids:
-        replay_stats.append(get_replay_stats(st.session_state.ball_chaser, replay_id))
-
-    for rs in replay_stats:
-        st.dataframe(rs.dataframe())
-
+    stats_display()
     caption()
 
 
