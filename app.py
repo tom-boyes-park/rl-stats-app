@@ -78,7 +78,8 @@ def app():
     for replay_id in st.session_state.replay_ids:
         replay_stats.append(get_replay_stats(st.session_state.ball_chaser, replay_id))
 
-    st.json(replay_stats)
+    for rs in replay_stats:
+        st.dataframe(rs.dataframe())
 
     caption()
 

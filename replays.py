@@ -2,6 +2,7 @@ import json
 from typing import List, NamedTuple, Dict
 
 from ball_chasing import BallChaser
+import pandas as pd
 
 import streamlit as st
 
@@ -38,6 +39,27 @@ class ReplayStatistics(NamedTuple):
 
     replay_id: str
     player_statistics: List[Dict]
+
+    def dataframe(self):
+        """
+        Creates a DataFrame from player statistics dictionaries.
+        """
+        # unpacks nested stats dict returning column names: level_1.level_2.level_3 etc.
+        df = pd.concat([pd.json_normalize(player) for player in self.player_statistics])
+        df = df.assign(
+            replay_id=self.replay_id, player_id=df["id.platform"] + ":" + df["id.id"]
+        )
+
+        # clean up columns
+        df.columns = [col.upper().replace(".", "_") for col in df.columns]
+        required_cols = [
+            "REPLAY_ID",
+            "PLAYER_ID",
+            *[col for col in df.columns if col.startswith("STATS_")],
+        ]
+        df = df[required_cols]
+
+        return df
 
 
 @st.experimental_memo
