@@ -35,20 +35,18 @@ def player_form_callback(player: str, platform: str, playlists: List[str]):
     """
     player_id = f"{PLATFORMS[platform]}:{player}"
     st.session_state.player_id = player_id
-    try:
-        replay_ids = get_replay_ids(
-            st.session_state.ball_chaser,
-            params={
-                "player-id": player_id,
-                "count": 50,
-                "sort-by": "replay-date",
-                "sort-dir": "desc",
-                "playlist": playlists,
-            },
-        )
-        st.session_state.replay_ids = replay_ids
-    except Exception as e:
-        st.sidebar.error(str(e))
+
+    replay_ids = get_replay_ids(
+        st.session_state.ball_chaser,
+        params={
+            "player-id": player_id,
+            "count": 50,
+            "sort-by": "replay-date",
+            "sort-dir": "desc",
+            "playlist": playlists,
+        },
+    )
+    st.session_state.replay_ids = replay_ids
 
 
 def player_form():
@@ -97,8 +95,8 @@ def stats_display():
 
 def app():
     title()
-    player_form()
     try:
+        player_form()
         stats_display()
     except Exception as e:
         st.error(str(e))
