@@ -23,6 +23,8 @@ Set environment variable for ballchasing API token:
 export BC_API_TOKEN=<your-token>
 ```
 
+For more information, see: https://ballchasing.com/doc/api#header-authentication.
+
 Run the app:
 ```commandline
 streamlit run app.py

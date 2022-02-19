@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 import pandas as pd
 import streamlit as st
@@ -23,18 +22,22 @@ def init_session_state():
 
 def title():
     st.title("🚀 Rocket League Gameplay Stats")
-    st.caption(
-        "_Rocket League is a registered trademark of Psyonix. Trademarks are the "
-        "property of their respective owners. Game materials copyright Psyonix. "
-        "Psyonix has not endorsed and is not responsible for this site or its content._"
+    st.markdown(
+        """
+    Enter your profile info in the sidebar and (optionally) filter playlists for which
+    to retrieve statistics from replays uploaded to
+    [ballchasing.com](https://ballchasing.com/).
+    [Radar charts](https://en.wikipedia.org/wiki/Radar_chart) are then plotted comparing
+    statistics from wins and losses in your 50 most recent games.
+    """
     )
 
 
-def player_form_callback(player: str, platform: str, playlists: List[str]):
+def load_stats():
     """
     Retrieves and stores replay ids in session state.
     """
-    player_id = f"{PLATFORMS[platform]}:{player}"
+    player_id = f"{PLATFORMS[st.session_state.platform]}:{st.session_state.player}"
     st.session_state.player_id = player_id
 
     replay_ids = get_replay_ids(
@@ -44,7 +47,7 @@ def player_form_callback(player: str, platform: str, playlists: List[str]):
             "count": 50,
             "sort-by": "replay-date",
             "sort-dir": "desc",
-            "playlist": playlists,
+            "playlist": st.session_state.playlists,
         },
     )
     st.session_state.replay_ids = replay_ids
@@ -56,15 +59,21 @@ def player_form():
         help="Unique player identifier. For console players, this is simply your "
         "gamer tag. For Steam/Epic players this will be your Steam/Epic ID, not your "
         "display name.",
+        key="player",
     )
-    platform = st.sidebar.selectbox(label="Platform", options=PLATFORMS.keys())
-    playlists = st.sidebar.multiselect(label="Playlists", options=PLAYLISTS)
+    st.sidebar.selectbox(label="Platform", options=PLATFORMS.keys(), key="platform")
+    st.sidebar.multiselect(label="Playlists", options=PLAYLISTS, key="playlists")
 
     st.sidebar.button(
         label="Retrieve Statistics",
         disabled=(not player),
-        on_click=player_form_callback,
-        args=(player, platform, playlists),
+        on_click=load_stats,
+    )
+
+    st.sidebar.caption(
+        "_Rocket League is a registered trademark of Psyonix. Trademarks are the "
+        "property of their respective owners. Game materials copyright Psyonix. "
+        "Psyonix has not endorsed and is not responsible for this site or its content._"
     )
 
 
@@ -101,6 +110,7 @@ def app():
         stats_display()
     except Exception as e:
         st.error(str(e))
+        st.button("Retry", on_click=load_stats)
 
 
 def main():
