@@ -7,6 +7,8 @@ between game wins and losses.
 
 Relies on users having their game replays uploaded to [ballchasing.com](https://ballchasing.com/)
 
+![app-screenshot](./images/app-screenshot.png)
+
 ## Running Locally
 
 Install requirements:
