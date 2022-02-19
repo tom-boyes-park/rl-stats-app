@@ -1,4 +1,5 @@
 import json
+import time
 from typing import List, NamedTuple, Dict
 
 from ball_chasing import BallChaser
@@ -74,6 +75,8 @@ def get_replay_stats(_ball_chaser: BallChaser, replay_id: str) -> ReplayStatisti
     BallChaser arg is prefixed with an underscore to prevent Streamlit attempting to
     hash the argument.
     """
+    # TODO: move rate limiting logic to BallChaser and make it more resilient
+    time.sleep(2)
     response = _ball_chaser.get_replay_stats(replay_id)
 
     # replays can be deleted

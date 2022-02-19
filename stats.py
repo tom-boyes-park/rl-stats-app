@@ -1,10 +1,9 @@
 import pandas as pd
 
-import plotly.express as px
-
+import plotly.graph_objects as go
 
 STATISTIC_GROUPS = {
-    "core": [
+    "Core": [
         "STATS_CORE_SHOTS",
         "STATS_CORE_SHOTS_AGAINST",
         "STATS_CORE_GOALS",
@@ -12,7 +11,7 @@ STATISTIC_GROUPS = {
         "STATS_CORE_SAVES",
         "STATS_CORE_ASSISTS",
     ],
-    "boost1": [
+    "Boost (1)": [
         "STATS_BOOST_PERCENT_ZERO_BOOST",
         "STATS_BOOST_PERCENT_BOOST_0_25",
         "STATS_BOOST_PERCENT_BOOST_25_50",
@@ -21,13 +20,13 @@ STATISTIC_GROUPS = {
         "STATS_BOOST_PERCENT_FULL_BOOST",
         "STATS_BOOST_AVG_AMOUNT",
     ],
-    "boost2": [
+    "Boost (2)": [
         "STATS_BOOST_BPM",
         "STATS_BOOST_BCPM",
         "STATS_BOOST_AMOUNT_USED_WHILE_SUPERSONIC",
         "STATS_BOOST_AMOUNT_STOLEN",
     ],
-    "movement1": [
+    "Movement": [
         "STATS_MOVEMENT_PERCENT_SLOW_SPEED",
         "STATS_MOVEMENT_PERCENT_BOOST_SPEED",
         "STATS_MOVEMENT_PERCENT_SUPERSONIC_SPEED",
@@ -38,20 +37,38 @@ STATISTIC_GROUPS = {
 }
 
 
-def plot_statistics(df: pd.DataFrame, stats_group: str):
-    # average stat values and pivot
-    stats_pivoted = (
-        pd.DataFrame(df[STATISTIC_GROUPS[stats_group]].mean(), columns=["value"])
+def stats_comparison_radar(df: pd.DataFrame, stats_group: str):
+    win_df = df.loc[df["WINNING_TEAM"]]
+    loss_df = df.loc[~df["WINNING_TEAM"]]
+
+    win_df_pivoted = (
+        pd.DataFrame(win_df[STATISTIC_GROUPS[stats_group]].mean(), columns=["value"])
         .rename_axis("statistic")
         .reset_index()
     )
-    fig = px.line_polar(
-        stats_pivoted,
-        r="value",
-        theta="statistic",
-        hover_name="statistic",
-        line_close=True,
+    loss_df_pivoted = (
+        pd.DataFrame(loss_df[STATISTIC_GROUPS[stats_group]].mean(), columns=["value"])
+        .rename_axis("statistic")
+        .reset_index()
     )
-    fig.update_traces(fill="toself")
+
+    fig = go.Figure(layout={"title": stats_group})
+
+    fig.add_trace(
+        go.Scatterpolar(
+            r=win_df_pivoted["value"],
+            theta=win_df_pivoted["statistic"],
+            fill="toself",
+            name="Wins",
+        )
+    )
+    fig.add_trace(
+        go.Scatterpolar(
+            r=loss_df_pivoted["value"],
+            theta=loss_df_pivoted["statistic"],
+            fill="toself",
+            name="Losses",
+        )
+    )
 
     return fig
