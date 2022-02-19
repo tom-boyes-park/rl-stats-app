@@ -77,14 +77,10 @@ def stats_display():
     progress_bar = st.progress(0)
     with st.empty():
         for i, replay_id in enumerate(st.session_state.replay_ids):
-            st.write(
-                f"Retrieving statisitics for replay id: '{replay_id}' "
-                f"({i+1}/{len(st.session_state.replay_ids)})"
-            )
-            progress_bar.progress((i + 1) / len(st.session_state.replay_ids))
             replay_stats.append(
                 get_replay_stats(st.session_state.ball_chaser, replay_id).dataframe()
             )
+            progress_bar.progress((i + 1) / len(st.session_state.replay_ids))
 
     if replay_stats:
         all_stats_df = pd.concat(replay_stats, ignore_index=True)
