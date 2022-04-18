@@ -1,11 +1,10 @@
 import json
-import time
+import logging
 from typing import Dict, List, NamedTuple
 
 import pandas as pd
 import streamlit as st
-
-from ball_chasing import BallChaser
+from ballchaser.client import BallChaser
 
 
 @st.experimental_memo
@@ -20,12 +19,9 @@ def get_replay_ids(_ball_chaser: BallChaser, params: dict) -> List[str]:
     BallChaser arg is prefixed with an underscore to prevent Streamlit attempting to
     hash the argument.
     """
-    response = _ball_chaser.get_replays(params)
+    logging.info(f"Searching for replays, params: {json.dumps(params, indent=2)}")
+    replay_list = [r for r in _ball_chaser.list_replays(**params)]
 
-    if response.status_code != 200:
-        raise Exception(f"Error {response.status_code}: {response.text}")
-
-    replay_list = response.json()["list"]
     if not replay_list:
         raise Exception(f"No replays found, params: {json.dumps(params, indent=4)}")
 
@@ -75,26 +71,21 @@ def get_replay_stats(_ball_chaser: BallChaser, replay_id: str) -> ReplayStatisti
     BallChaser arg is prefixed with an underscore to prevent Streamlit attempting to
     hash the argument.
     """
-    # TODO: move rate limiting logic to BallChaser and make it more resilient
-    time.sleep(2)
-    response = _ball_chaser.get_replay_stats(replay_id)
+    logging.info(f"Getting stats for replay: {replay_id}")
+    try:
+        replay = _ball_chaser.get_replay(replay_id)
+    except Exception as e:
+        if "not found" in str(e):
+            return ReplayStatistics(replay_id, [])
+        raise e
 
-    # replays can be deleted
-    if response.status_code == 404:
-        return ReplayStatistics(replay_id, [])
-
-    if not response.status_code == 200:
-        raise Exception(f"Something went wrong, error: {response.text}")
-
-    response_json = response.json()
-
-    blue_players = response_json["blue"]["players"]
-    orange_players = response_json["orange"]["players"]
+    blue_players = replay["blue"]["players"]
+    orange_players = replay["orange"]["players"]
 
     # determine winning team (breaks down for games where there was a draw + forfeit,
     # however we have no other field to determine winning team and this scenario will
     # be rare)
-    blue_core_stats = response_json["blue"]["stats"]["core"]
+    blue_core_stats = replay["blue"]["stats"]["core"]
     blue_win = blue_core_stats["goals"] > blue_core_stats["goals_against"]
 
     for player in blue_players:

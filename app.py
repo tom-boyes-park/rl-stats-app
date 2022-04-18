@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 import streamlit as st
+from ballchaser.client import BallChaser
 
-from ball_chasing import BallChaser
 from replays import get_replay_ids, get_replay_stats
 from stats import STATISTIC_GROUPS, stats_comparison_radar
 
@@ -13,7 +13,7 @@ PLAYLISTS = ["ranked-duels", "ranked-doubles", "ranked-standard"]
 
 def init_session_state():
     if "ball_chaser" not in st.session_state:
-        ball_chaser = BallChaser(os.getenv("BC_API_TOKEN"))
+        ball_chaser = BallChaser(os.getenv("BC_API_TOKEN"), backoff=True, max_tries=5)
         st.session_state["ball_chaser"] = ball_chaser
 
     if "replay_ids" not in st.session_state:
@@ -43,10 +43,10 @@ def load_stats():
     replay_ids = get_replay_ids(
         st.session_state.ball_chaser,
         params={
-            "player-id": player_id,
+            "player_id": player_id,
             "count": 50,
-            "sort-by": "replay-date",
-            "sort-dir": "desc",
+            "sort_by": "replay-date",
+            "sort_dir": "desc",
             "playlist": st.session_state.playlists,
         },
     )
